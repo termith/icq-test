@@ -1,7 +1,7 @@
 from icq_client import IcqTestClient
 import unittest
 import const
-
+import logging
 
 class TestIcqLogin(unittest.TestCase):
     def setUp(self):
@@ -25,4 +25,5 @@ class TestIcqLogin(unittest.TestCase):
 
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO)
     unittest.main()
