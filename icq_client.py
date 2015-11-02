@@ -1,12 +1,13 @@
 import requests
 import traceback
 import json
+import logging
+
 import const
 
 
 class IcqTestClient(object):
     CLIENT_LOGIN_URL = 'https://api.login.icq.net/auth/clientLogin'
-
     CONNECTION_TIMEOUT = 60 * 1000
     DEV_ID = 'ic1Ytjc4pxslFTEL'
     CLIENT_NAME = 'Test Icq Client'
@@ -31,17 +32,18 @@ class IcqTestClient(object):
 
     def do_login(self):
         try:
-            print('Login with credentials: %s, %s' % (self.login, self.password))
+            logging.info('Login with credentials: %s, %s' % (self.login, self.password))
             response = requests.post(self.CLIENT_LOGIN_URL, data=self._make_login_params(),
                                      timeout=self.CONNECTION_TIMEOUT)
             if response.status_code == 200:
                 res_content = json.loads(response.text).get('response', {})
                 return res_content.get('statusCode', 0), res_content.get('data', {})
             else:
-                print('Server returns %s instead of 200' % response.status_code)
+                logging.error('Server returns %s instead of 200' % response.status_code)
                 return const.INTERNAL_ERROR_CODE, {}
         except requests.exceptions.Timeout:
-            traceback.print_exc()
+            logging.error('Timeout reached while connecting to server')
+            logging.info(traceback.format_exc())
             return const.INTERNAL_ERROR_CODE, {}
 
 
