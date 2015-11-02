@@ -1,50 +1,50 @@
 import requests
-import sys
+import traceback
+import json
+import const
+
 
 class IcqTestClient(object):
+    CLIENT_LOGIN_URL = 'https://api.login.icq.net/auth/clientLogin'
 
-	CLIENT_LOGIN_URL = 'https://api.login.icq.net/auth/clientLogin'
+    CONNECTION_TIMEOUT = 60 * 1000
+    DEV_ID = 'ic1Ytjc4pxslFTEL'
+    CLIENT_NAME = 'Test Icq Client'
+    CLIENT_VERSION = '1.0'
 
-	CONNECTION_TIMEOUT = 60 * 1000
-	DEV_ID = 'ic1Ytjc4pxslFTEL'
-	CLIENT_NAME = 'Mandarin Android'
-	CLIENT_VERSION = '1.0'
+    def __init__(self, login, password):
+        self.login = login
+        self.password = password
 
-	EXTERNAL_LOGIN_OK = 200
-	EXTERNAL_LOGIN_ERROR = 330
-	INTERNAL_ERROR = 10000
+    def _make_login_params(self):
 
-	def __init__(self, login, password):
-		self.login = login
-		self.password = password
+        login_params = {
+            const.CLIENT_NAME_FIELD: self.CLIENT_NAME,
+            const.CLIENT_VERSION_FIELD: self.CLIENT_VERSION,
+            const.DEV_ID_FIELD: self.DEV_ID,
+            const.FORMAT_FIELD: 'json',
+            const.ID_TYPE_FIELD: 'ICQ',
+            const.PASSWORD_FIELD: self.password,
+            const.LOGIN_FIELD: self.login
+        }
+        return login_params
 
-	def _make_login_params(self):
-		login_params = {
-		'clientName': self.CLIENT_NAME,
-		'clientVersion': self.CLIENT_VERSION,
-		'devId': self.DEV_ID,
-		'f': 'json',
-		'idType': 'ICQ',
-		'pwd': self.password,
-		's': self.login
-		}
-		return login_params
+    def do_login(self):
+        try:
+            print('Login with credentials: %s, %s' % (self.login, self.password))
+            response = requests.post(self.CLIENT_LOGIN_URL, data=self._make_login_params(),
+                                     timeout=self.CONNECTION_TIMEOUT)
+            if response.status_code == 200:
+                res_content = json.loads(response.text).get('response', {})
+                return res_content.get('statusCode', 0), res_content.get('data', {})
+            else:
+                print('Server returns %s instead of 200' % response.status_code)
+                return const.INTERNAL_ERROR_CODE, {}
+        except requests.exceptions.Timeout:
+            traceback.print_exc()
+            return const.INTERNAL_ERROR_CODE, {}
 
-	def do_login(self):
-		try:
-			response = requests.post(self.CLIENT_LOGIN_URL, data=self._make_login_params(), timeout=self.CONNECTION_TIMEOUT)
-			if response.status == EXTERNAL_LOGIN_OK:
-				# Do some handle with response attributes
-				return EXTERNAL_LOGIN_OK, response
-			else if:
-				response.status == EXTERNAL_LOGIN_ERROR:
-				return EXTERNAL_LOGIN_ERROR, response
-		except requests.exceptions.Timeout:
-			# Log traceback or do something else
-			return INTERNAL_ERROR, {}
 
 if __name__ == '__main__':
-	c = IcqTestClient('291140261', 'password')
-	c.do_login()
-
-
+    c = IcqTestClient('291140261', 'password')
+    print(c.do_login())
