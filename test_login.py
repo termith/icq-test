@@ -7,10 +7,6 @@ class TestIcqLogin(unittest.TestCase):
     def setUp(self):
         self.client = IcqTestClient('291140261', 'password')
 
-    def test_server_available(self):
-        login_status, _ = self.client.do_login()
-        assert login_status != const.INTERNAL_ERROR_CODE, 'Sever returns internal error'
-
     def test_correct_credentials(self):
         login_status, login_data = self.client.do_login()
         assert login_status == const.EXTERNAL_LOGIN_OK, 'Cannot login with correct credentials'
